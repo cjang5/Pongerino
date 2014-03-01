@@ -33,6 +33,7 @@ bool init();
 bool loadMedia();
 SDL_Texture* loadTexture(std::string path);
 void close();
+void updateScore(int x);
 
 bool init() {
 	//initialization flag
@@ -160,20 +161,105 @@ void close() {
 
 //method for finding out if a bar is present in a certain coordinate
 bool isBarPresent(float x, float y) {
-	if (x <= leftBarRectPosX + 100 && (y >= leftBarRectPosY && y <= leftBarRectPosY + 299)) {
+	/*
+	if (x <= leftBarRectPosX + 100 && ((y >= leftBarRectPosY && y <= leftBarRectPosY + 299) || (y + 49 >= leftBarRectPosY && y + 49 <= leftBarRectPosY + 299))) {
 		return true;
 	}
-	else if (x + 50 >= rightBarRectPosX && (y >= rightBarRectPosY && y <= rightBarRectPosY + 299)) {
+	else if (x + 50 >= rightBarRectPosX && ((y >= rightBarRectPosY && y <= rightBarRectPosY + 299) || (y + 49 >= rightBarRectPosY && y + 49 <= rightBarRectPosY + 299))) {
 		return true;
-	}
+	} */
 
 	return false;
+}
+
+void collision(float x, float y) {
+	//wall collisions
+	if (ballPosY < 0.0) {
+		ballMovingUp = false;
+	}
+	else if ((ballPosY + 50) > SCREEN_HEIGHT) {
+		ballMovingUp = true;
+	}
+
+	//left bar collisions
+	if ((x = leftBarRectPosX + 99) && ((y >= leftBarRectPosY && y <= leftBarRectPosY + 299) || (y + 49 >= leftBarRectPosY && y + 49 <= leftBarRectPosY + 299))) {
+		//coming in from top right
+		if (!ballMovingRight && !ballMovingUp) {
+			ballMovingRight = true;
+			ballMovingUp = false;
+		}
+		//coming in from bottom right
+		if (!ballMovingRight && ballMovingUp) {
+			ballMovingRight = true;
+			ballMovingRight = true;
+		}
+	}
+	if ((x < leftBarRectPosX + 99 && x > leftBarRectPosX + 49) && (y + 49 >= leftBarRectPosY)) {
+		ballMovingRight = true;
+		ballMovingUp = true;
+	}
+	if ((x + 49 <= leftBarRectPosX + 49) && (y + 49 >= leftBarRectPosY)) {
+		ballMovingRight = false;
+		ballMovingUp = true;
+	}
+	if ((x < leftBarRectPosX + 99 && x > leftBarRectPosX + 49) && (y <= leftBarRectPosY + 299)) {
+		ballMovingRight = true;
+		ballMovingUp = false;
+	}
+	if ((x + 49 <= leftBarRectPosX + 49) && (y <= leftBarRectPosY + 299)) {
+		ballMovingRight = false;
+		ballMovingUp = false;
+	}
+
+	//right bar collisions
+	if ((x + 49 >= rightBarRectPosX) && ((y >= rightBarRectPosY && y <= rightBarRectPosY + 299) || (y + 49 >= rightBarRectPosY && y + 49 <= rightBarRectPosY + 299))) {
+		if (ballMovingRight && !ballMovingUp) {
+			ballMovingRight = false;
+			ballMovingUp = false;
+		}
+		if (ballMovingRight && ballMovingUp) {
+			ballMovingRight = false;
+			ballMovingUp = false;
+		}
+	}
+	if ((x + 49 > rightBarRectPosX && x + 49 < rightBarRectPosX + 49) && (y + 49 >= rightBarRectPosY)) {
+		ballMovingRight = false;
+		ballMovingUp = true;
+	}
+	if ((x >= rightBarRectPosX + 49) && (y + 49 >= rightBarRectPosY)) {
+		ballMovingRight = true;
+		ballMovingUp = true;
+	}
+	if ((x + 49 > rightBarRectPosX && x + 49 < rightBarRectPosX + 49) && (y <= rightBarRectPosY + 299)) {
+		ballMovingRight = false;
+		ballMovingUp = false;
+	}
+	if ((x >= rightBarRectPosX + 49) && (y <= rightBarRectPosY + 299)) {
+		ballMovingRight = true;
+		ballMovingUp = false;
+	}
+
+	//WIN CONDITIONS
+	if (ballPosX < 0.0)
+		updateScore(1); //give opponent a point
+	else if (ballPosX + 49 > SCREEN_WIDTH)
+		updateScore(0); //give yourself a point
 }
 
 //reset function for after a point is scored
 void reset() {
 	ballPosX = (SCREEN_WIDTH / 2) - 25;
 	ballPosY = (SCREEN_HEIGHT / 2) - 25;
+
+	if (ballMovingRight)
+		ballMovingRight = false;
+	else
+		ballMovingRight = true;
+
+	if (ballMovingUp)
+		ballMovingUp = false;
+	else
+		ballMovingUp = true;
 }
 
 //method to update the score (0 = you, 1 = AI, 2 = reset)
@@ -184,7 +270,7 @@ void updateScore(int player) {
 		SDL_SetRenderDrawColor(globalRenderer, 0, i, 0, 0);
 		SDL_RenderFillRect(globalRenderer, &screenRect);
 		SDL_RenderPresent(globalRenderer);
-	}
+	} 
 
 	reset();
 }
@@ -277,11 +363,12 @@ int main(int argc, char* args[]) {
 
 				//increment the ai bar so it keeps moving
 				if (barMovingUp) {
-					rightBarRectPosY -= 0.05;
+					rightBarRectPosY -= 0.07;
 				}
 				else {
-					rightBarRectPosY += 0.05;
+					rightBarRectPosY += 0.07;
 				}
+
 
 				//ball movement
 				SDL_Rect ballRect;
@@ -293,6 +380,11 @@ int main(int argc, char* args[]) {
 				//set viewport to ballRect
 				SDL_RenderSetViewport(globalRenderer, &ballRect);
 
+				//draw the ball
+				SDL_RenderCopy(globalRenderer, ball, NULL, NULL);
+
+				collision(ballPosX, ballPosY);
+				/*
 				//collision physics
 				if (isBarPresent(ballPosX, ballPosY)) {
 					//change directions (left/right)
@@ -300,22 +392,9 @@ int main(int argc, char* args[]) {
 						ballMovingRight = false;
 					else
 						ballMovingRight = true;
-				}
-				if (ballPosY < 0.0) {
-					ballMovingUp = false;
-				}
-				else if ((ballPosY + 50) > SCREEN_HEIGHT) {
-					ballMovingUp = true;
-				}
+				} */
 				
-				//WIN CONDITIONS
-				if (ballPosX < 0.0)
-					updateScore(1); //give opponent a point
-				else if (ballPosX + 50 > SCREEN_WIDTH)
-					updateScore(0); //give yourself a point
-
-				//draw the ball
-				SDL_RenderCopy(globalRenderer, ball, NULL, NULL);
+				
 
 				//determine how the ball will move
 				if (ballMovingRight) {

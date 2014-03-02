@@ -21,6 +21,9 @@
     <ClCompile Include="to do list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="past methods.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\ball.png">

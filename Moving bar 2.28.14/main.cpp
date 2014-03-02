@@ -23,8 +23,8 @@ float rightBarRectPosY = 0.0;
 bool barMovingUp = false; //determine whether the AI should be moving up or down
 //ball
 SDL_Texture* ball = NULL;
-float ballPosX = (SCREEN_WIDTH / 2) - 25;
-float ballPosY = (SCREEN_HEIGHT / 2) - 25;
+int ballPosX = (SCREEN_WIDTH / 2) - 25;
+int ballPosY = (SCREEN_HEIGHT / 2) - 25;
 bool ballMovingRight = false;
 bool ballMovingUp = false;
 
@@ -160,96 +160,58 @@ void close() {
 }
 
 //method for finding out if a bar is present in a certain coordinate
-bool isBarPresent(float x, float y) {
-	/*
-	if (x <= leftBarRectPosX + 100 && ((y >= leftBarRectPosY && y <= leftBarRectPosY + 299) || (y + 49 >= leftBarRectPosY && y + 49 <= leftBarRectPosY + 299))) {
-		return true;
+int isBarPresent(int x, int y) {
+	
+	//left bar collisions
+	if (x == (leftBarRectPosX + 100) && ((y >= leftBarRectPosY && y < leftBarRectPosY + 300) ||
+		(y + 50 > leftBarRectPosY && y + 50 <= leftBarRectPosY + 300))) {
+		return 1;
 	}
-	else if (x + 50 >= rightBarRectPosX && ((y >= rightBarRectPosY && y <= rightBarRectPosY + 299) || (y + 49 >= rightBarRectPosY && y + 49 <= rightBarRectPosY + 299))) {
+	else if (x < leftBarRectPosX + 100 && x >= leftBarRectPosX + 50 && y == leftBarRectPosY + 300) {
+		return 2;
+	}
+	else if (x < leftBarRectPosX + 50 && y == leftBarRectPosY + 300) {
+		return 3;
+	}
+	else if (x < leftBarRectPosX + 100 && x >= leftBarRectPosX + 50 && y + 50 == leftBarRectPosY) {
+		return 4;
+	}
+	else if (x < leftBarRectPosX + 50 && y + 50 == leftBarRectPosY) {
+		return 5;
+	}
+	
+	//right bar collisions
+	if (x + 50 == rightBarRectPosX && ((y >= rightBarRectPosY && y < rightBarRectPosY + 300) ||
+		(y + 50 > rightBarRectPosY && y + 50 <= rightBarRectPosY + 300))) {
+		return 6;
+	}
+	else if (x + 50 > rightBarRectPosX && x + 50 <= rightBarRectPosX + 50 && y == rightBarRectPosY + 300) {
+		return 7;
+	}
+	else if (x + 50 > rightBarRectPosX && x + 50 <= rightBarRectPosX + 50 && y + 50 == rightBarRectPosY) {
+		return 8;
+	}
+	else if (x + 50 > rightBarRectPosX && y + 50 == rightBarRectPosY) {
+		return 9;
+	}
+	else if (x + 50 > rightBarRectPosY && y == rightBarRectPosY + 300) {
+		return 10;
+	}
+	
+	return 0;
+}
+
+bool isBetween(float pos, float lo, float hi) {
+	if (pos > lo && pos < hi)
 		return true;
-	} */
 
 	return false;
 }
 
-void collision(float x, float y) {
-	//wall collisions
-	if (ballPosY < 0.0) {
-		ballMovingUp = false;
-	}
-	else if ((ballPosY + 50) > SCREEN_HEIGHT) {
-		ballMovingUp = true;
-	}
-
-	//left bar collisions
-	if ((x = leftBarRectPosX + 99) && ((y >= leftBarRectPosY && y <= leftBarRectPosY + 299) || (y + 49 >= leftBarRectPosY && y + 49 <= leftBarRectPosY + 299))) {
-		//coming in from top right
-		if (!ballMovingRight && !ballMovingUp) {
-			ballMovingRight = true;
-			ballMovingUp = false;
-		}
-		//coming in from bottom right
-		if (!ballMovingRight && ballMovingUp) {
-			ballMovingRight = true;
-			ballMovingRight = true;
-		}
-	}
-	if ((x < leftBarRectPosX + 99 && x > leftBarRectPosX + 49) && (y + 49 >= leftBarRectPosY)) {
-		ballMovingRight = true;
-		ballMovingUp = true;
-	}
-	if ((x + 49 <= leftBarRectPosX + 49) && (y + 49 >= leftBarRectPosY)) {
-		ballMovingRight = false;
-		ballMovingUp = true;
-	}
-	if ((x < leftBarRectPosX + 99 && x > leftBarRectPosX + 49) && (y <= leftBarRectPosY + 299)) {
-		ballMovingRight = true;
-		ballMovingUp = false;
-	}
-	if ((x + 49 <= leftBarRectPosX + 49) && (y <= leftBarRectPosY + 299)) {
-		ballMovingRight = false;
-		ballMovingUp = false;
-	}
-
-	//right bar collisions
-	if ((x + 49 >= rightBarRectPosX) && ((y >= rightBarRectPosY && y <= rightBarRectPosY + 299) || (y + 49 >= rightBarRectPosY && y + 49 <= rightBarRectPosY + 299))) {
-		if (ballMovingRight && !ballMovingUp) {
-			ballMovingRight = false;
-			ballMovingUp = false;
-		}
-		if (ballMovingRight && ballMovingUp) {
-			ballMovingRight = false;
-			ballMovingUp = false;
-		}
-	}
-	if ((x + 49 > rightBarRectPosX && x + 49 < rightBarRectPosX + 49) && (y + 49 >= rightBarRectPosY)) {
-		ballMovingRight = false;
-		ballMovingUp = true;
-	}
-	if ((x >= rightBarRectPosX + 49) && (y + 49 >= rightBarRectPosY)) {
-		ballMovingRight = true;
-		ballMovingUp = true;
-	}
-	if ((x + 49 > rightBarRectPosX && x + 49 < rightBarRectPosX + 49) && (y <= rightBarRectPosY + 299)) {
-		ballMovingRight = false;
-		ballMovingUp = false;
-	}
-	if ((x >= rightBarRectPosX + 49) && (y <= rightBarRectPosY + 299)) {
-		ballMovingRight = true;
-		ballMovingUp = false;
-	}
-
-	//WIN CONDITIONS
-	if (ballPosX < 0.0)
-		updateScore(1); //give opponent a point
-	else if (ballPosX + 49 > SCREEN_WIDTH)
-		updateScore(0); //give yourself a point
-}
-
 //reset function for after a point is scored
 void reset() {
-	ballPosX = (SCREEN_WIDTH / 2) - 25;
-	ballPosY = (SCREEN_HEIGHT / 2) - 25;
+	ballPosX = (SCREEN_WIDTH / 2) - 100;
+	ballPosY = (SCREEN_HEIGHT / 2) - 50;
 
 	if (ballMovingRight)
 		ballMovingRight = false;
@@ -273,6 +235,27 @@ void updateScore(int player) {
 	} 
 
 	reset();
+}
+
+bool running = true;
+bool bDelay = false;
+
+void pause() {
+	if (running)
+		running = false;
+	else
+		running = true;
+}
+
+void delay() {
+	if (bDelay)
+		bDelay = false;
+	else
+		bDelay = true;
+}
+
+void displayLeftBar() {
+	printf(" LEFT BAR = (%i, %i)", leftBarRectPosX, leftBarRectPosY);
 }
 
 int main(int argc, char* args[]) {
@@ -311,108 +294,181 @@ int main(int argc, char* args[]) {
 						case SDLK_UP:
 							leftBarRectPosY -= 10;
 							break;
+						case SDLK_SPACE:
+							pause();
+							break;
+						case SDLK_d:
+							delay();
+							break;
+						case SDLK_RETURN:
+							displayLeftBar();
+							break;
+						case SDLK_r:
+							reset();
+							break;
+						case SDLK_f:
+							printf(" %i", isBarPresent(ballPosX, ballPosY));
+							break;
 						}
 					}
 				}
-				//set teh color
-				SDL_SetRenderDrawColor(globalRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-				//clear screen
-				SDL_RenderClear(globalRenderer);
+				if (running) {
+					//set teh color
+					SDL_SetRenderDrawColor(globalRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+					//clear screen
+					SDL_RenderClear(globalRenderer);
 
-				//render to dimensions of the left bar
-				SDL_Rect leftBarRect;
-				leftBarRect.x = leftBarRectPosX;
-				leftBarRect.y = leftBarRectPosY;
-				leftBarRect.w = 100;
-				leftBarRect.h = 300;
+					//render to dimensions of the left bar
+					SDL_Rect leftBarRect;
+					leftBarRect.x = leftBarRectPosX;
+					leftBarRect.y = leftBarRectPosY;
+					leftBarRect.w = 100;
+					leftBarRect.h = 300;
 
-				//dont let the bar go off the screen
-				if (leftBarRect.y < 0)
-					leftBarRectPosY = 0;
-				if (leftBarRect.y > SCREEN_HEIGHT - 300)
-					leftBarRectPosY = SCREEN_HEIGHT - 300;
+					//dont let the bar go off the screen
+					if (leftBarRect.y < 0)
+						leftBarRectPosY = 0;
+					if (leftBarRect.y > SCREEN_HEIGHT - 300)
+						leftBarRectPosY = SCREEN_HEIGHT - 300;
 
-				//set viewport to leftBarRect
-				SDL_RenderSetViewport(globalRenderer, &leftBarRect);
+					//set viewport to leftBarRect
+					SDL_RenderSetViewport(globalRenderer, &leftBarRect);
 
-				//draw the left bar image
-				SDL_RenderCopy(globalRenderer, leftBar, NULL, NULL);
+					//draw the left bar image
+					SDL_RenderCopy(globalRenderer, leftBar, NULL, NULL);
 
-				//rect for the AI bar
-				SDL_Rect rightBarRect;
-				rightBarRect.x = rightBarRectPosX;
-				rightBarRect.y = rightBarRectPosY;
-				rightBarRect.w = 100;
-				rightBarRect.h = 300;
+					//rect for the AI bar
+					SDL_Rect rightBarRect;
+					rightBarRect.x = rightBarRectPosX;
+					rightBarRect.y = rightBarRectPosY;
+					rightBarRect.w = 100;
+					rightBarRect.h = 300;
 
-				//set viewport to rightBarRect
-				SDL_RenderSetViewport(globalRenderer, &rightBarRect);
+					//set viewport to rightBarRect
+					SDL_RenderSetViewport(globalRenderer, &rightBarRect);
 
-				//dont let the AI bar go off the screen
-				if (rightBarRect.y < 0) {
-					rightBarRectPosY = 0;
-					barMovingUp = false;
-				}
-				if (rightBarRect.y > SCREEN_HEIGHT - 300) {
-					rightBarRectPosY = SCREEN_HEIGHT - 300;
-					barMovingUp = true;
-				}
+					//dont let the AI bar go off the screen
+					if (rightBarRect.y < 0) {
+						rightBarRectPosY = 0;
+						barMovingUp = false;
+					}
+					if (rightBarRect.y > SCREEN_HEIGHT - 300) {
+						rightBarRectPosY = SCREEN_HEIGHT - 300;
+						barMovingUp = true;
+					}
 
-				//draw the AI image
-				SDL_RenderCopy(globalRenderer, rightBar, NULL, NULL);
+					//draw the AI image
+					SDL_RenderCopy(globalRenderer, rightBar, NULL, NULL);
 
-				//increment the ai bar so it keeps moving
-				if (barMovingUp) {
-					rightBarRectPosY -= 0.07;
-				}
-				else {
-					rightBarRectPosY += 0.07;
-				}
+					//increment the ai bar so it keeps moving
+					if (barMovingUp) {
+						rightBarRectPosY -= 2;
+					}
+					else {
+						rightBarRectPosY += 2;
+					}
 
 
-				//ball movement
-				SDL_Rect ballRect;
-				ballRect.x = ballPosX;
-				ballRect.y = ballPosY;
-				ballRect.w = 50;
-				ballRect.h = 50;
+					//ball movement
+					SDL_Rect ballRect;
+					ballRect.x = ballPosX;
+					ballRect.y = ballPosY;
+					ballRect.w = 50;
+					ballRect.h = 50;
 
-				//set viewport to ballRect
-				SDL_RenderSetViewport(globalRenderer, &ballRect);
+					//set viewport to ballRect
+					SDL_RenderSetViewport(globalRenderer, &ballRect);
 
-				//draw the ball
-				SDL_RenderCopy(globalRenderer, ball, NULL, NULL);
-
-				collision(ballPosX, ballPosY);
-				/*
-				//collision physics
-				if (isBarPresent(ballPosX, ballPosY)) {
-					//change directions (left/right)
-					if (ballMovingRight)
-						ballMovingRight = false;
-					else
+					switch (isBarPresent(ballPosX, ballPosY)) {
+					case 1:
+						printf("1");
 						ballMovingRight = true;
-				} */
-				
-				
+						break;
+					case 2:
+						printf("2");
+						ballMovingRight = true;
+						ballMovingUp = false;
+						break;
+					case 3:
+						printf("3");
+						ballMovingUp = false;
+						break;
+					case 4:
+						printf("4");
+						ballMovingRight = true;
+						ballMovingUp = true;
+						break;
+					case 5:
+						printf("5");
+						ballMovingRight = false;
+						ballMovingUp = true;
+						break;
+					case 6:
+						printf("6");
+						ballMovingRight = false;
+						break;
+					case 7:
+						printf("7");
+						ballMovingRight = false;
+						ballMovingUp = false;
+						break;
+					case 8:
+						ballMovingRight = true;
+						ballMovingUp = false;
+						break;
+					case 9:
+						ballMovingRight = true;
+						ballMovingUp = true;
+						break;
+					case 10:
+						ballMovingRight = true;
+						ballMovingUp = false;
+						break;
+					}
 
-				//determine how the ball will move
-				if (ballMovingRight) {
-					ballPosX += 0.05;
-				}
-				else {
-					ballPosX -= 0.05;
-				}
+					//wall collisions
+					if (ballPosY < 0.0) {
+						ballMovingUp = false;
+					}
+					else if ((ballPosY + 50) > SCREEN_HEIGHT) {
+						ballMovingUp = true;
+					}
 
-				if (ballMovingUp) {
-					ballPosY -= 0.05;
-				}
-				else {
-					ballPosY += 0.05;
-				}
+					//determine how the ball will move
+					if (ballMovingRight) {
+						ballPosX += 1;
+					}
+					else {
+						ballPosX -= 1;
+					}
 
-				//update the screen
-				SDL_RenderPresent(globalRenderer);
+					if (ballMovingUp) {
+						ballPosY -= 1;
+					}
+					else {
+						ballPosY += 1;
+					}
+
+					//WIN CONDITIONS
+					if (ballPosX < 0.0)
+						updateScore(1); //give opponent a point
+					else if (ballPosX + 50 > SCREEN_WIDTH)
+						updateScore(0); //give yourself a point
+
+					//draw the ball
+					SDL_RenderCopy(globalRenderer, ball, NULL, NULL);
+
+					//update the screen
+					SDL_RenderPresent(globalRenderer);
+
+					printf("\n(%i, %i)", ballPosX, ballPosY);
+
+					if (bDelay) {
+						SDL_Delay(200);
+					}
+
+					SDL_Delay(5);
+				}
 			}
 		}
 	}

@@ -70,6 +70,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="past methods.cpp" />
     <ClCompile Include="to do list.cpp" />
   </ItemGroup>
   <ItemGroup>

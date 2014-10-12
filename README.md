@@ -1,4 +1,4 @@
-Pongerino
+# Pongerino
 
 A classic take on the game Pong.
 
